@@ -106,7 +106,12 @@
             document.querySelector(".menu").style.display = "none";
             document.querySelector(".game").style.display = "block";
 
-            updateScoreText();
+            // Update skor sesuai mode permainan
+            if (mode === "pvp") {
+                document.getElementById("scoreText").innerText = `Player X: ${playerScore} | Player O: ${playerScore}`;
+            } else if (mode === "ai") {
+                document.getElementById("scoreText").innerText = `Player X: ${playerScore} | AI: ${botScore}`;
+            }
         }
 
         function makeMove(index) {
@@ -218,7 +223,11 @@
         }
 
         function updateScoreText() {
-            document.getElementById("scoreText").innerText = `Player: ${playerScore} | AI: ${botScore}`;
+            if (mode === "pvp") {
+                document.getElementById("scoreText").innerText = `Player X: ${playerScore} | Player O: ${playerScore}`;
+            } else if (mode === "ai") {
+                document.getElementById("scoreText").innerText = `Player X: ${playerScore} | AI: ${botScore}`;
+            }
         }
 
         function resetGame() {
