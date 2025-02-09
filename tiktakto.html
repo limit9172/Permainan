@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            color: #333;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 {
+            margin-top: 10px;
+            font-size: 2.5em;
+            color: #444;
+        }
+        #menu {
+            margin-bottom: 20px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 8px;
+            justify-content: center;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.8);
+            color: black;
+            font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border: 3px solid #333;
+            transition: background 0.3s;
+        }
+        .cell:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+        button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            font-size: 18px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #ff4757;
+        }
+        #homeBtn {
+            display: none;
+            background: #1e90ff;
+        }
+        #homeBtn:hover {
+            background: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic-Tac-Toe</h1>
+
+    <div id="menu">
+        <button onclick="startGame(false)">Dua Pemain</button>
+        <button onclick="startGame(true)">Lawan Bot</button>
+    </div>
+
+    <div class="board" style="display:none;">
+        <div class="cell" onclick="makeMove(0)"></div>
+        <div class="cell" onclick="makeMove(1)"></div>
+        <div class="cell" onclick="makeMove(2)"></div>
+        <div class="cell" onclick="makeMove(3)"></div>
+        <div class="cell" onclick="makeMove(4)"></div>
+        <div class="cell" onclick="makeMove(5)"></div>
+        <div class="cell" onclick="makeMove(6)"></div>
+        <div class="cell" onclick="makeMove(7)"></div>
+        <div class="cell" onclick="makeMove(8)"></div>
+    </div>
+
+    <h2 id="status" style="display:none;">Giliran: X</h2>
+    <button id="resetBtn" onclick="resetGame()" style="display:none;">Reset</button>
+    <button id="homeBtn" onclick="goHome()">Home</button>
+
+    <script>
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = "X";
+        let gameActive = false;
+        let vsBot = false;
+
+        function startGame(isBot) {
+            vsBot = isBot;
+            gameActive = true;
+            document.getElementById("menu").style.display = "none";
+            document.querySelector(".board").style.display = "grid";
+            document.getElementById("status").style.display = "block";
+            document.getElementById("resetBtn").style.display = "block";
+            document.getElementById("homeBtn").style.display = "block";
+            document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
+        }
+
+        function makeMove(index) {
+            if (!gameActive || board[index] !== "") return;
+
+            board[index] = currentPlayer;
+            document.getElementsByClassName("cell")[index].innerText = currentPlayer;
+
+            if (checkWinner()) {
+                document.getElementById("status").innerText = `Pemenang: ${currentPlayer}`;
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
+
+            if (vsBot && currentPlayer === "O") {
+                setTimeout(botMove, 500);
+            }
+        }
+
+        function botMove() {
+            let emptyCells = board.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
+            let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+
+            makeMove(randomIndex);
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return winPatterns.some(pattern => {
+                let [a, b, c] = pattern;
+                return board[a] !== "" && board[a] === board[b] && board[a] === board[c];
+            });
+        }
+
+        function resetGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            currentPlayer = "X";
+            document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
+            document.querySelectorAll(".cell").forEach(cell => cell.innerText = "");
+        }
+
+        function goHome() {
+            gameActive = false;
+            board = ["", "", "", "", "", "", "", "", ""];
+            document.getElementById("menu").style.display = "block";
+            document.querySelector(".board").style.display = "none";
+            document.getElementById("status").style.display = "none";
+            document.getElementById("resetBtn").style.display = "none";
+            document.getElementById("homeBtn").style.display = "none";
+            document.querySelectorAll(".cell").forEach(cell => cell.innerText = "");
+        }
+    </script>
+</body>
+</html>
