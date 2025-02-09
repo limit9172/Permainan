@@ -8,7 +8,7 @@
         body {
             text-align: center;
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
             color: #333;
             height: 100vh;
             display: flex;
@@ -17,48 +17,38 @@
             justify-content: center;
         }
         h1 {
-            margin-top: 10px;
             font-size: 2.5em;
-            color: #444;
         }
-        #menu {
-            margin-bottom: 20px;
+        .menu {
+            display: block;
+        }
+        .game {
+            display: none;
         }
         .board {
             display: grid;
             grid-template-columns: repeat(3, 100px);
             grid-template-rows: repeat(3, 100px);
             gap: 8px;
-            justify-content: center;
             margin: 20px auto;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
         .cell {
             width: 100px;
             height: 100px;
-            background: rgba(255, 255, 255, 0.8);
-            color: black;
             font-size: 2.5em;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
+            background: white;
             border: 3px solid #333;
-            transition: background 0.3s;
-        }
-        .cell:hover {
-            background: rgba(255, 255, 255, 1);
         }
         button {
             margin-top: 15px;
             padding: 12px 25px;
             font-size: 18px;
-            background: #ff6b6b;
+            background: #007bff;
             color: white;
             border: none;
             cursor: pointer;
@@ -66,56 +56,57 @@
             transition: 0.3s;
         }
         button:hover {
-            background: #ff4757;
+            background: #0056b3;
         }
-        #homeBtn {
-            display: none;
-            background: #1e90ff;
-        }
-        #homeBtn:hover {
-            background: #007bff;
+        .scoreboard {
+            font-size: 1.5em;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Tic-Tac-Toe</h1>
-
-    <div id="menu">
-        <button onclick="startGame(false)">Dua Pemain</button>
-        <button onclick="startGame(true)">Lawan Bot</button>
+    <div class="menu">
+        <h1>Tic-Tac-Toe</h1>
+        <button onclick="startGame('pvp')">Player vs Player</button>
+        <button onclick="startGame('ai')">Player vs AI</button>
     </div>
 
-    <div class="board" style="display:none;">
-        <div class="cell" onclick="makeMove(0)"></div>
-        <div class="cell" onclick="makeMove(1)"></div>
-        <div class="cell" onclick="makeMove(2)"></div>
-        <div class="cell" onclick="makeMove(3)"></div>
-        <div class="cell" onclick="makeMove(4)"></div>
-        <div class="cell" onclick="makeMove(5)"></div>
-        <div class="cell" onclick="makeMove(6)"></div>
-        <div class="cell" onclick="makeMove(7)"></div>
-        <div class="cell" onclick="makeMove(8)"></div>
+    <div class="game">
+        <h1>Tic-Tac-Toe</h1>
+        <div class="scoreboard">
+            <p id="scoreText"></p>
+        </div>
+        <div class="board">
+            <div class="cell" onclick="makeMove(0)"></div>
+            <div class="cell" onclick="makeMove(1)"></div>
+            <div class="cell" onclick="makeMove(2)"></div>
+            <div class="cell" onclick="makeMove(3)"></div>
+            <div class="cell" onclick="makeMove(4)"></div>
+            <div class="cell" onclick="makeMove(5)"></div>
+            <div class="cell" onclick="makeMove(6)"></div>
+            <div class="cell" onclick="makeMove(7)"></div>
+            <div class="cell" onclick="makeMove(8)"></div>
+        </div>
+        <h2 id="status">Giliran: X</h2>
+        <button onclick="resetGame()">Reset Game</button>
+        <button onclick="resetScore()">Reset Score</button>
+        <button onclick="backToMenu()">Home</button>
     </div>
-
-    <h2 id="status" style="display:none;">Giliran: X</h2>
-    <button id="resetBtn" onclick="resetGame()" style="display:none;">Reset</button>
-    <button id="homeBtn" onclick="goHome()">Home</button>
 
     <script>
         let board = ["", "", "", "", "", "", "", "", ""];
         let currentPlayer = "X";
         let gameActive = false;
-        let vsBot = false;
+        let mode = "";
+        let playerScore = 0, botScore = 0;
 
-        function startGame(isBot) {
-            vsBot = isBot;
+        function startGame(selectedMode) {
+            mode = selectedMode;
             gameActive = true;
-            document.getElementById("menu").style.display = "none";
-            document.querySelector(".board").style.display = "grid";
-            document.getElementById("status").style.display = "block";
-            document.getElementById("resetBtn").style.display = "block";
-            document.getElementById("homeBtn").style.display = "block";
-            document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
+            document.querySelector(".menu").style.display = "none";
+            document.querySelector(".game").style.display = "block";
+
+            updateScoreText();
         }
 
         function makeMove(index) {
@@ -124,25 +115,85 @@
             board[index] = currentPlayer;
             document.getElementsByClassName("cell")[index].innerText = currentPlayer;
 
-            if (checkWinner()) {
-                document.getElementById("status").innerText = `Pemenang: ${currentPlayer}`;
+            let winner = checkWinner();
+            if (winner) {
+                document.getElementById("status").innerText = `Pemenang: ${winner}`;
                 gameActive = false;
+                updateScore(winner);
                 return;
             }
 
-            currentPlayer = currentPlayer === "X" ? "O" : "X";
-            document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
-
-            if (vsBot && currentPlayer === "O") {
+            if (mode === "pvp") {
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+            } else {
+                currentPlayer = "O";
+                document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
                 setTimeout(botMove, 500);
             }
+            document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
         }
 
         function botMove() {
-            let emptyCells = board.map((val, idx) => val === "" ? idx : null).filter(val => val !== null);
-            let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            let bestScore = -Infinity;
+            let move;
 
-            makeMove(randomIndex);
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === "") {
+                    board[i] = "O";
+                    let score = minimax(board, 0, false);
+                    board[i] = "";
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+
+            board[move] = "O";
+            document.getElementsByClassName("cell")[move].innerText = "O";
+
+            let winner = checkWinner();
+            if (winner) {
+                document.getElementById("status").innerText = `Pemenang: ${winner}`;
+                gameActive = false;
+                updateScore(winner);
+                return;
+            }
+
+            currentPlayer = "X";
+            document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            let result = checkWinner();
+            if (result === "O") return 10 - depth;
+            if (result === "X") return depth - 10;
+            if (!board.includes("")) return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === "") {
+                        board[i] = "O";
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = "";
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === "") {
+                        board[i] = "X";
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = "";
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
         }
 
         function checkWinner() {
@@ -151,29 +202,41 @@
                 [0, 3, 6], [1, 4, 7], [2, 5, 8],
                 [0, 4, 8], [2, 4, 6]
             ];
-            return winPatterns.some(pattern => {
+            for (let pattern of winPatterns) {
                 let [a, b, c] = pattern;
-                return board[a] !== "" && board[a] === board[b] && board[a] === board[c];
-            });
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            return board.includes("") ? null : "Seri";
+        }
+
+        function updateScore(winner) {
+            if (winner === "X") playerScore++;
+            if (winner === "O" && mode === "ai") botScore++;
+            updateScoreText();
+        }
+
+        function updateScoreText() {
+            document.getElementById("scoreText").innerText = `Player: ${playerScore} | AI: ${botScore}`;
         }
 
         function resetGame() {
-            board = ["", "", "", "", "", "", "", "", ""];
+            board.fill("");
             gameActive = true;
             currentPlayer = "X";
             document.getElementById("status").innerText = `Giliran: ${currentPlayer}`;
             document.querySelectorAll(".cell").forEach(cell => cell.innerText = "");
         }
 
-        function goHome() {
-            gameActive = false;
-            board = ["", "", "", "", "", "", "", "", ""];
-            document.getElementById("menu").style.display = "block";
-            document.querySelector(".board").style.display = "none";
-            document.getElementById("status").style.display = "none";
-            document.getElementById("resetBtn").style.display = "none";
-            document.getElementById("homeBtn").style.display = "none";
-            document.querySelectorAll(".cell").forEach(cell => cell.innerText = "");
+        function resetScore() {
+            playerScore = 0;
+            botScore = 0;
+            updateScoreText();
+        }
+
+        function backToMenu() {
+            location.reload();
         }
     </script>
 </body>
